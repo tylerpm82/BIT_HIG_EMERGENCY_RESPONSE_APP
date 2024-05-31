@@ -1,49 +1,91 @@
 ---
--- title:       DB_SCHEMA.sql
--- description: database schema for emergency response application
--- for project: HIG_BIT_EMER_APP
+-- title:       database table sketch
+-- description: database schema (work-in-progress)
 -- date:        2024 may 31
+-- for project: HIG_BIT_EMER_APP
 -- author(s):   jack l.  
+-- filename:    DB_SCHEMA.sql
 ---
 
 # PEOPLE
 # ------------------------------------
-create table public_safety_official();
-create table campus_school_administrator_personnel();
-create table city_municipal_official();
-create table student (
+create table person (
     id int unsigned auto_increment,
-    school_id int unsigned,
+    affiliate_campus_id int unsigned null, -- students, admins, etc. can be linked to a campus
+    affiliate_agency_id int unsigned null, -- public safety, municipal officials,  etc. can be linked to an agency
     alias varchar(100) not null,
     first_name varchar(140) not null,
     last_name varchar(140) not null,
     email_address varchar(240) not null,
+    is_a_minor boolean null default false, -- off by default, conditional on ( prompt ) || could use DOB but is that too sketch?
+    is_student boolean null default true,
+    is_public_safety_official boolean null default false,
+    is_campus_school_admin_personnel boolean null default false,
+    is_city_municipal_official boolean null default false,
+    account_origin_date datetime default null CURRENT_TIMESTAMP(),
     can_report_emergencies boolean null default true,
     can_create_in_app_event boolean null default false,
     can_create_safety_bulletin boolean null default false,
     can_view_safety_bulletin boolean null default true,
+    can_make_request_on_extrinsic_account boolean null default false,
+    account_info_masked boolean null default true,          -- account info masked by default, affected by view
+    allows_requests_on_account boolean null default false   -- no requests made on student-account info (user has to turn this off)
+                                                            -- what edge-cases would be justified to override?
+                                                            --  
+    notification_all_emergencies boolean null default false,
+    notification_relative_emergencies boolean null default true,
+    notification_all_non_emergencies boolean null default false,
+    notification_relative_non_emergencies boolean null default false,
+    notification_request_on_account_info_occured boolean null default true,
     last_known_location POINT null,
     primary key (id),
-    foreign key (school_id) references school(id),
+    foreign key (affiliate_campus_id) references school(id),
+    foreign key (affiliate_agency_id) references school(id),
     unique(email_address, alias)
 );
 
 create table emergency_contact ( 
-    -- emergency contacts are linked to students. students can have n_max emergency_contacts
+    -- emergency contacts are non-acounts linked to a person (student, etc) have n_max emergency_contacts
     id int unsigned auto_increment,
-    student_id int unsigned,
+    linked_to_this_id int unsigned,
     first_name varchar(140) not null,
     last_name varchar(140) not null,
     email_address varchar(240) not null,
     phone_number char(10) null,
-    relationship_to_student set ("parent", "spouse", "relative", "significant other", "guardian") not null,
-    can_report_emergencies boolean null default false,
-    can_create_in_app_event boolean null default false,
-    can_create_safety_bulletin boolean null default false,
-    can_view_safety_bulletin boolean null default true
+    relationship set ( "parent", "spouse", "relative", "significant other", "guardian", "personal acquaintance" ) not null,
     primary key(id),
-    foreign key(student_id) references student(id),
+    foreign key(linked_to_this_id) references person(id),
     unique(email_address, phone_number)
+);
+
+# ENTITIES / ORGANIZATIONS
+# ------------------------------------
+
+create table organization (
+    id int unsigned auto_increment,
+    alias varchar(140) not null,
+    main_email_address varchar(240) not null,
+    alt_email_address varchar(240) null,
+    main_phone_number_a char(10) null,
+    alt_phone_number_b char(10) null,
+    point_of_contact_is_user boolean null default false,
+    college_or_university boolean null default true,
+    public_safety_agency boolean null default false,
+    municipal_agency boolean null default false,
+    commercial_business boolean null default false,
+    non_profit_org boolean null default false,
+    geographic_coordinates POINT null,
+    building_number varchar(32) not null, -- could be A102, etc.
+    street_name varchar(120) not null,
+    street_type set("street", "road", "boulevard", "blvd") not null, -- limit to valid street types?
+    city varchar(120) not null,
+    state_abbreviation char(2) not null,
+    postal_code char(5) not null,
+    -- what can organizations do/not do on-platform??
+    --
+    --
+    primary key(id),
+    unique(campus_name, geographic_coordinates)
 );
 
 # EVENTS
@@ -74,21 +116,7 @@ create table emergency (
 # PLACES / VENUES
 # ------------------------------------
 create table venue();
-create table campus(
-    id int unsigned auto_increment,
-    campus_name varchar(140) not null,
-    email_address varchar(240) not null,
-    phone_number char(10) null,
-    geographic_coordinates POINT null,
-    building_number varchar(32) not null, -- could be A102, etc.
-    street_name varchar(120) not null,
-    street_type set("street", "road", "boulevard", "blvd"), -- limit to valid street types?
-    city varchar(120) null default "Atlanta",
-    state_abbreviation char(2) null default "GA",
-    postal_code char(5) null,
-    primary key(id),
-    unique(campus_name, geographic_coordinates)
-);
+
 
 # NOTIFICATIONS
 # ------------------------------------
@@ -102,13 +130,44 @@ create table announcement (
     emergency boolean null default false,
     local_event boolean null default false,
     feedback_and_app_support boolean null default false,
+    account_specific boolean null default false
     primary key(id),
     foreign key(relative_campus_id) references campus(id),
     unique(title)
 );
 
+# ACCOUNT-SPECIFIC REQUESTS/EVENTS
+create table account_inquiry (
+    id int unsigned auto_increment,
+    inquirer_id int unsigned,
+    inquiry_date datetime null default CURRENT_TIMESTAMP(),
+    -- to_remove
+    -- to_get_account_info
+    -- reset_account
+    -- < ... >
+    additional_detail varchar(320) null,
+    primary key (id),
+    foreign key (inquirer_id) references person(id)
+);
+
+# ------------------------------------
+
+# NON-ACCOUNT INFO-INPUT-CREATION
+# ------------------------------------
+create table safety_bulletin();
+create table feature_request();
+
 # REPORTS
 # ------------------------------------
-create table emergency_report();
-create table safety_bulletin();
- 
+-- verified emergency report
+-- de-mystified emergency report
+-- incident resolution report
+-- safety bulletin report 
+-- feature request report
+-- account inquiry report
+-- account modification and management report
+-- campus-agency-venue report
+-- platform metric report
+
+
+
