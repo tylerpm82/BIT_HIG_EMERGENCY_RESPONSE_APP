@@ -11,8 +11,7 @@
 # ------------------------------------
 create table person (
     id int unsigned auto_increment,
-    affiliate_campus_id int unsigned null, -- students, admins, etc. can be linked to a campus
-    affiliate_agency_id int unsigned null, -- public safety, municipal officials,  etc. can be linked to an agency
+    affiliate_organization_id int unsigned null, 
     alias varchar(100) not null,
     first_name varchar(140) not null,
     last_name varchar(140) not null,
@@ -39,8 +38,7 @@ create table person (
     notification_request_on_account_info_occured boolean null default true,
     last_known_location POINT null,
     primary key (id),
-    foreign key (affiliate_campus_id) references school(id),
-    foreign key (affiliate_agency_id) references school(id),
+    foreign key (affiliate_organization_id) references organization(id),
     unique(email_address, alias)
 );
 
