@@ -62,28 +62,40 @@ create table emergency_contact (
 create table organization (
     id int unsigned auto_increment,
     alias varchar(140) not null,
-    main_email_address varchar(240) not null,
-    alt_email_address varchar(240) null,
-    main_phone_number_a char(10) null,
-    alt_phone_number_b char(10) null,
-    point_of_contact_is_user boolean null default false,
-    college_or_university boolean null default true,
-    public_safety_agency boolean null default false,
-    municipal_agency boolean null default false,
-    commercial_business boolean null default false,
-    non_profit_org boolean null default false,
-    geographic_coordinates POINT null,
-    building_number varchar(32) not null, -- could be A102, etc.
-    street_name varchar(120) not null,
-    street_type set("street", "road", "boulevard", "blvd") not null, -- limit to valid street types?
-    city varchar(120) not null,
-    state_abbreviation char(2) not null,
-    postal_code char(5) not null,
+    email_address_main varchar(240) not null,
+    email_address_alt varchar(240) null,
+    headquarters_city set() null,   -- set of valid city options
+    headquarters_state set() null,  -- set of valid state options
+    headquarters_country set() null default "US" --
+    point_of_contact_is_platform_user boolean null default false,
+    type_educational boolean null default false,
+    type_non_profit boolean null default false,
+    type_government boolean null default false,
+    type_municipal boolean null default false,
+    type_healthcare boolean null default false,
+    type_public_safety boolean null default false,
+    industry_sector char(72) null,  -- "this sector" or <non-profit, government, healthcare, ... >
+    number_of_employees int unsigned null,
+    annual_revenue_estimate int unsigned null,
+    mission_statement varchar(140) null,
+    description_main_product_service varchar(240) not null,
+    url_website varchar(100) null,
+    url_twitter varchar(100) null,
+    url_instagram varchar(100) null,
+    url_facebook varchar(100) null,
+    url_tiktok varchar(100) null,
+    url_linkedin varchar(100) null,
+    url_discord varchar(100) null,
+    url_aux_a varchar(100) null, -- auxiliary url
+    url_aux_b varchar(100) null, -- auxiliary url
+    phone_number_main char(10) null,
+    phone_number_alt char(10) null,
+    phone_number_emer char(10) null,
     -- what can organizations do/not do on-platform??
     --
     --
     primary key(id),
-    unique(campus_name, geographic_coordinates)
+    unique(alias, url_website, url_twitter, url_instagram, url_facebook, url_tiktok, url_linkedin, url_discord, url_aux_a, url_aux_b)
 );
 
 # EVENTS
@@ -98,22 +110,70 @@ create table emergency (
     description_of_emergency varchar(320) not null,
     description_of_location varchar(320) null,
     location_coordinates POINT not null, -- POINT(LATITUDE, LONGITUDE)
-    emergency_type_a boolean null, -- <type>
-    emergency_type_b boolean null, -- <type>
-    emergency_type_c boolean null, -- <type>
-    emergency_type_d boolean null, -- <type>
-    emergency_type_e boolean null, -- <type>
-    emergency_type_f boolean null, -- other, aux
+    natural_disaster_earthquake null default false,
+    -- natural_disaster_tsunami boolean null, -- not neccessary for mvp; auc is not typhoon-prone
+    natural_disaster_hurricane_cyclone_typhoon null default false,
+    natural_disaster_tornado null default false,
+    natural_disaster_flood null default false,
+    natural_disaster_drought null default false,
+    natural_disaster_wildfire null default false, -- <type>
+    natural_disaster_extreme_heatwave null default false, -- <type>
+    natural_disaster_severe_storm_thunderstorm_hail null default false, -- <type>
+    natural_disaster_blizzard_snowstrom null default false, -- <type>
+    digital_threat_phishing null default false,
+    digital_threat_ransomware null default false,
+    digital_threat_ddos_attack null default false,
+    digital_threat_malware_virus null default false,
+    digital_threat_data_breach null default false,
+    digital_threat_IT_system_failure null default false,
+    digital_threat_electronmagnetic_pulse_attack null default false,
+    public_safety_hazard_terrorist_attack null default false,
+    public_safety_hazard_active_shoooter null default false,
+    public_safety_hazard_chemical_spill_industrial_accident null default false,
+    public_safety_hazard_radiological_incident null default false,
+    public_safety_hazard_biological_threat null default false,
+    public_safety_hazard_plane_train_automobile_crash null default false,
+    infrastructure_failure_power_grid_failure boolean null default false,
+    infrastructure_failure_structural_collapse boolean null default false,
+    infrastructure_failure_power_grid_failure boolean null default false,
+    infrastrucutre_failure_water_supply_contamination boolean null default false,
+    public_health_emergency_disease_outbreak boolean null default false,
+    public_health_emergency_mass_casualty_incident boolean null default false,
+    civil_turbulence_riot_public_unrest boolean null default false,
+    civil_turbulence_workplace_accident boolean null default false,
+    cyber_threat boolean null, -- other, aux
     date_resolved datetime null, -- cannot be resolved until verified, resolved by validator
-    primary key(id),
-    foreign key (affected_campus_id) references campus(id),
-    foreign key(validator_id) references public_safety_official(id),
-    foreign key (reporter_id) references student(id)
+    primary key (id),
+    foreign key (affected_campus_id)    references campus(id),
+    foreign key (validator_id)          references public_safety_official(id),
+    foreign key (reporter_id)           references student(id)
 );
 
 # PLACES / VENUES
 # ------------------------------------
-create table venue();
+-- a building can be registered to the platform
+-- spatial domains can be linked to platform organizations
+create table spatial_domain (
+    id int unsigned auto_increment,
+    linked_organization_id int unsigned,
+    alias varchar(172) not null,
+    description varchar(320) not null,
+    maximum_capacity int unsigned null,
+    is_college_or_university boolean null default false,
+    -- other types of domains below
+
+    -- 
+    geographic_coordinates POINT null,
+    building_number varchar(32) not null, -- could be A102, etc.
+    street_name varchar(120) not null,
+    street_type set("street", "road", "boulevard", "blvd") not null, -- limit to valid street types?
+    city varchar(120) not null,
+    state_abbreviation char(2) not null,
+    postal_code char(5) not null,
+    primary key(id),
+    foreign key(linked_organization_id) references organization(id),
+    unique(alias)
+);
 
 
 # NOTIFICATIONS
@@ -135,6 +195,7 @@ create table announcement (
 );
 
 # ACCOUNT-SPECIFIC REQUESTS/EVENTS
+# ------------------------------------
 create table account_inquiry (
     id int unsigned auto_increment,
     inquirer_id int unsigned,
