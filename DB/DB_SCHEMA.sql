@@ -110,8 +110,6 @@ create table Organization (
     )
 );
 
-
-
 # EVENTS
 # ------------------------------------
 create table Emergency (
@@ -155,7 +153,6 @@ create table Emergency (
     public_health_emergency_mass_casualty_incident boolean null default false,
     civil_turbulence_riot_public_unrest boolean null default false,
     civil_turbulence_workplace_accident boolean null default false,
-    cyber_threat boolean null, -- other, aux
     date_resolved datetime null, -- cannot be resolved until verified, resolved by validator
     primary key (id),
     foreign key (affected_campus_id)    references campus(id),
@@ -298,7 +295,7 @@ create table Announcement (
 
 # ACCOUNT-SPECIFIC REQUESTS/EVENTS
 # ------------------------------------
-create table accountinquiry (
+create table AccountInquiry (
     id int unsigned auto_increment,
     inquirer_id int unsigned,
     inquiry_date datetime null default current_timestamp(),
@@ -378,6 +375,3 @@ create table FeatureRequest();
 -- system_performance
 -- feedback_and_support
 -- safety bulletin report 
-
-
-

@@ -1,0 +1,13 @@
+---
+-- title:       OMNI ELK OVERVIEW
+-- description: context and information on high-level project details, brand-building.
+-- date:        2024 hune 04 (genesis)
+-- for project: HIG_BIT_EMER_RESPONSE_UPSTART
+-- author(s):   jack l.  
+-- filename:    INFOR_CONTEXT.txt
+---
+
+COMPANY NAME:           OMNI-ELK (pulling from HIG's deer symbolism)
+KEY PRODUCT:            ERIN A/K/A EMERGENCY RESPONSE INFORMATION NETWORK
+SUB-PRODUCT(S):         <LIST HERE>
+FOUNDING MEMBER(S):     <LIST HERE>
