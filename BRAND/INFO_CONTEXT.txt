@@ -7,8 +7,8 @@
 -- filename:    INFO_CONTEXT.txt
 ---
 
-COMPANY NAME:           <OMNI ELK (channels HIG's symbolism)
-KEY PRODUCT:            ERIN A/K/A EMERGENCY RESPONSE INFORMATION NETWORK
+COMPANY NAME:           OMNI ELK (channels HIG's symbolism)
+CORE PRODUCT:           ERIN A/K/A EMERGENCY RESPONSE INFORMATION NETWORK
                                                       INTELLIGENCE
 SUB-PRODUCT(S):         <LIST HERE>
 FOUNDING MEMBER(S):     <LIST HERE>
